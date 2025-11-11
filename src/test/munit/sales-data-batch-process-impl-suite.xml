@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="sales-data-batch-process-impl-suite.xml" />
+	<munit:test name="sales-data-batch-process-impl-subflow-test" doc:id="348c231e-8c5a-4296-8bd3-cf187e30d358" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="b6277d80-6475-4f46-94fd-47af87fe37a8" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="common-subflow-failure" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="e12aa766-6878-4c99-95bf-429054d3db31" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="fbe7cdde-bbdd-41a1-a16d-a7cfbb4d6c86" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="common-subflow-success" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="01610b64-8621-442c-b014-e7884469f48e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="cf512fe6-46d4-48c4-a2ef-4415cd26066d" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="POST" attributeName="method" />
+					<munit-tools:with-attribute whereValue="request-to-sapi-db" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="e1e0ede7-db82-4d4b-894e-6e0cbb822d9a" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="HTTP_Request_configuration_db" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Read" doc:id="3b767440-4cc3-4875-ae9a-ddc5d9ec1665" processor="ftp:read">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d0cd95ef-faea-44d1-a983-a6f78c057eee" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output text/csv --- readUrl('classpath://salesdatabatchprocessimplsubflowtest\mock_payload2.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://salesdatabatchprocessimplsubflowtest\mock_attributes1.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="rootMessage" value="#[readUrl('classpath://salesdatabatchprocessimplsubflowtest\mock_variable_.dwl')]" />
+						<munit-tools:variable key="counter" value="#[readUrl('classpath://salesdatabatchprocessimplsubflowtest\mock_variable_1.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock List" doc:id="c715a0b1-0434-4f08-b945-68ab0825513e" processor="ftp:list">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9a5ad57b-0c6c-4c08-8168-30417a1f97c7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://salesdatabatchprocessimplsubflowtest\mock_payload3.dwl')]" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="6bce5825-99b6-49a6-a3f0-09eb58b6eb81" >
+				<munit:payload value="#[readUrl('classpath://salesdatabatchprocessimplsubflowtest\set-event_payload1.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-process-impl-subflow" doc:id="bd709655-4bbe-4d22-a56c-b9c180116a7e" name="sales-data-batch-process-impl-subflow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify end" doc:id="ca8dc73c-32c3-4aff-80ff-6c5f14631eaf" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d0f32aa3-04ca-4a27-818e-fd22627f115f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="sales-data-batch-process-impl-subflow-test1" doc:id="be6e6c51-c23f-401d-aa89-fe2ad73135c5" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Read" doc:id="582c49cb-97c0-4396-9dd9-94622fa3e137" processor="ftp:read" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d0cd95ef-faea-44d1-a983-a6f78c057eee" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output text/csv --- readUrl('classpath://salesdatabatchprocessimplsubflowtest\mock_payload2.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://salesdatabatchprocessimplsubflowtest\mock_attributes1.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="rootMessage" value="#[readUrl('classpath://salesdatabatchprocessimplsubflowtest\mock_variable_.dwl')]" />
+						<munit-tools:variable key="counter" value="#[readUrl('classpath://salesdatabatchprocessimplsubflowtest\mock_variable_1.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock List" doc:id="9a6f8a0a-8c54-437d-986d-7ca80d9b3f1c" processor="ftp:list" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9a5ad57b-0c6c-4c08-8168-30417a1f97c7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://salesdatabatchprocessimplsubflowtest\mock_payload3.dwl')]" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="624fd3bf-68d6-4d9e-b01d-d0fbf7e51e12" >
+				<munit:payload value="#[readUrl('classpath://salesdatabatchprocessimplsubflowtest\set-event_payload1.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-process-impl-subflow" doc:id="0372740a-e6f2-44d7-b64c-d83c5ba39ea4" name="sales-data-batch-process-impl-subflow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="c862193b-2f95-4a02-82e7-495282b80b61" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import salesdatabatchprocessimplsubflowtest::assert_expression_payload1
+---
+assert_expression_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="sales-api-specFlow-test" doc:id="65796123-2b40-4459-a802-98a96875ecda" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock sales-data-batch-process-impl" doc:id="4816ad15-99b4-4820-a0a4-81863ea6453f" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="f50e64ff-7c02-4a78-9b14-0ffe1e74e68f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://salesapispecFlowtest\mock_payload1.dwl')]" encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="fileName" value="#[output application/java --- readUrl('classpath://salesapispecFlowtest\mock_variable_2.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="batchJobInstanceId" value="#[readUrl('classpath://salesapispecFlowtest\mock_variable_3.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="55724c7d-7fc6-43d6-93d4-b57a0cbbcd19" >
+				<munit:payload value="#[readUrl('classpath://salesapispecFlowtest\set-event_payload1.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-api-specFlow" doc:id="5c07f585-8091-4f60-90f3-fd8710c14f6b" name="sales-api-specFlow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="945259c4-9ab3-4e17-9155-4d468328c2cf" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import salesapispecFlowtest::assert_expression_payload1
+---
+assert_expression_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest" doc:id="ef9c7adc-ab07-4d86-ba38-83d1df0b0995" description="Test" expectedErrorType="HTTP:BAD_GATEWAY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="7b4b0aac-84bc-4cca-9a7b-bf6ae1090791" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:BAD_GATEWAY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="a44dea5e-b3ae-490b-b20e-cf92edbeae87" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest1" doc:id="3bd647eb-aa40-487b-a4a3-0f5aaf0015dd" description="Test" expectedErrorType="HTTP:BAD_REQUEST" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="2ec65a51-954c-4787-9a77-5eea21f6e8b7" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="e1d07ebf-bfdf-4249-b8f5-736406600dd4" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest2" doc:id="5798e316-f5a2-49d6-b2b0-8d1e42b73619" description="Test" expectedErrorType="HTTP:NOT_FOUND" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="45c3cc74-c725-4a6a-b1cd-0950dbfc9fe6" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="d7385304-043a-403d-ade7-b90cde7778f8" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest3" doc:id="404af60a-9c30-4190-ab7a-0e3affc4dad8" description="Test" expectedErrorType="HTTP:METHOD_NOT_ALLOWED" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="f7196f76-f4ee-45fd-bdc9-e76a5a094875" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="8c17520a-2734-4e32-b537-e8d2d682d7db" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest4" doc:id="fcc40461-222a-442a-851d-cf6a765be1b0" description="Test" expectedErrorType="HTTP:CLIENT_SECURITY" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="998bf2d1-78d6-4e8e-b960-103d954ffa67" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:CLIENT_SECURITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="d88d1b5a-ef20-46aa-bb50-9012227723f0" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest5" doc:id="26aa8045-a7cd-4778-90b5-3e949bc45f59" description="Test" expectedErrorType="HTTP:CONNECTIVITY" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="e44f941f-90b0-4de4-b315-e34306515f20" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="45497ebb-cd07-4735-a41e-fdbd17f2a9e7" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest6" doc:id="925eddaa-0260-41db-9662-c28c1bae5a14" description="Test" expectedErrorType="HTTP:FORBIDDEN" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="731ed995-10ba-4920-8d6b-9df7d3514b55" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:FORBIDDEN" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="01bd05e9-20ef-48a7-a090-639e32d18608" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest7" doc:id="8714fd52-72f8-4512-8630-b7e3aaf85c5d" description="Test" expectedErrorType="HTTP:INTERNAL_SERVER_ERROR" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="e40aefed-2baa-4966-b8dc-5b9dd36f9fc5" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:INTERNAL_SERVER_ERROR" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="f0c2f1da-8bd6-4de0-8f10-ca6f21bb245c" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest8" doc:id="97d17b32-811e-4f68-aa1f-c32b75d68149" description="Test" expectedErrorType="HTTP:NOT_ACCEPTABLE" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="d568ba33-e216-4b03-8215-fe7a2f64c35c" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:NOT_ACCEPTABLE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="b70af79c-abcc-4045-b550-48801983699a" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest9" doc:id="3957fa9f-1464-4cef-8289-e14d32ee8bf2" description="Test" expectedErrorType="HTTP:PARSING" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="bc7350c2-b566-46d2-b67d-49a58d4ce1bf" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:PARSING" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="1d19d7d3-51cb-4b24-8fcc-266f18a83f63" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest10" doc:id="105214f7-a9cf-42e8-b71d-fc26ea18d409" description="Test" expectedErrorType="HTTP:RETRY_EXHAUSTED" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="fbb515ac-984d-4349-9ade-b891175b4c9d" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:RETRY_EXHAUSTED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="cddbfc20-a719-4040-a36d-6e026710f251" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest11" doc:id="833067ce-06bf-4e24-ab1b-7210465fd913" description="Test" expectedErrorType="HTTP:SECURITY" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="56a58f65-9fb3-4fb7-aacc-518c872bc8b1" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:SECURITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="7d37dbd1-8201-4ee8-8fcf-0838f2f74db1" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest12" doc:id="2b406fa9-f535-4064-8eb0-195ec8bcd1c9" description="Test" expectedErrorType="HTTP:UNSUPPORTED_MEDIA_TYPE" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="4202c433-dc13-4d1f-a1e9-cc08527315a8" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="dff386cb-d5fd-4d71-94b8-881bdc94d910" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest13" doc:id="1a11283b-68d5-46a8-abb7-8835c5d3c2e1" description="Test" expectedErrorType="SFTP:ACCESS_DENIED" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="f9581ca4-407f-4c8d-b10e-bc87bd0a6e40" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SFTP:ACCESS_DENIED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="ee8601b7-da46-4632-a366-b88e493f247a" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest14" doc:id="9e7dca00-5af4-4d68-9825-e123a2493f99" description="Test" expectedErrorType="SFTP:CONNECTIVITY" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="66cc5834-c1eb-4292-b4dc-fa7a1cede66e" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SFTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="300e0119-4cef-4299-ac80-e521de7f44af" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest15" doc:id="03586ab9-c090-4568-aec6-cdeb92d1535d" description="Test" expectedErrorType="SFTP:FILE_ALREADY_EXISTS" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="6ec9a3a3-da82-45f9-9079-b0db832d0b9f" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SFTP:FILE_ALREADY_EXISTS" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="989daf00-6102-46d0-a05f-68f482c3a1f7" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest16" doc:id="0020ccb2-b320-467b-8e11-966ce003f2ad" description="Test" expectedErrorType="SFTP:ILLEGAL_PATH" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="8ad1db2b-3b11-4302-b67c-1189a41dc6d3" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId=" SFTP:ILLEGAL_PATH" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="cff387c2-da5a-427b-a26c-b6532421eb7b" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest17" doc:id="10b9bcea-ae78-4697-acd0-26c84b98413e" description="Test" expectedErrorType="SFTP:RETRY_EXHAUSTED" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="74ceaf08-8d81-40ba-bcbe-47bb063a3f2a" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SFTP:RETRY_EXHAUSTED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="e8f210cb-a71c-400f-aaa6-5ff3329b0792" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest18" doc:id="ba41448b-0859-4ae5-af54-a213b7913efb" description="Test" expectedErrorType="APIKIT:BAD_REQUEST" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="4d1402ed-424f-4041-8930-24e4f8b78cfe" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="f7911951-839f-494d-9c5a-00bff52b25ac" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest19" doc:id="f15821e9-c7d1-4841-b442-9e93e958f6aa" description="Test" expectedErrorType="APIKIT:NOT_FOUND" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="c0dec2ce-0cbd-425b-b527-014d48e35b71" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="9a20d0ce-9aad-47b2-bcbb-cf9cd5197868" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest110" doc:id="7ed744c3-089c-42f9-96e3-b958f1b815d2" description="Test" expectedErrorType="APIKIT:METHOD_NOT_ALLOWED" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="58bd412b-6027-4c71-9ec8-7b167535f881" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="8104d445-4939-4833-9e23-1f0da84923de" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest111" doc:id="f261ad28-96cc-42f6-be37-053247076390" description="Test" expectedErrorType="APIKIT:NOT_ACCEPTABLE" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="7b011245-08c1-4c40-b696-88f9b99ef74a" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_ACCEPTABLE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="6cdf09c4-93e2-4108-8c62-2767d08d91e6" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest112" doc:id="c58549b2-20a7-47ea-b1a5-3b0e5d64c0bc" description="Test" expectedErrorType="APIKIT:UNSUPPORTED_MEDIA_TYPE" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="b0a417d3-f337-4273-a8b6-7aea11cb920d" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="3437ce4e-fd72-4e34-a5be-23aa73a26f49" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest113" doc:id="0f6d0d04-f91c-4cd7-8a33-8175c9f0dce6" description="Test" expectedErrorType="APIKIT:NOT_IMPLEMENTED" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="874fda4e-48f4-4cde-acfc-fd13e4032d74" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_IMPLEMENTED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="de588d6d-32cd-4a75-93c6-1d163ff2646a" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="batch-api-spec-test-suite-sales-data-batch-p-api-mainTest114" doc:id="a90f6882-2393-4d80-9fe6-af81eb7424e9" description="Test" expectedErrorType="ANY" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="a5e84fa3-c35f-4441-bfc6-f1841c17d324" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sales-data-batch-p-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sales-data-batch-p-api-main" doc:id="57735379-3d58-4e0c-84f3-94a7d3580377" name="sales-data-batch-p-api-main" />
+		</munit:execution>
+	</munit:test>
+
+
+</mule>

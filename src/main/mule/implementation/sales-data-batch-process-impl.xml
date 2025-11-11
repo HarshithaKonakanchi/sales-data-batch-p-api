@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<ftp:config name="FTP_Config" doc:name="FTP Config" doc:id="7ba80a33-8e85-4a33-8eba-ddf224738217" >
+		<ftp:connection host="127.0.0.1" username="ftpuser" password="ftp123" />
+	</ftp:config>
+	<sub-flow name="sales-data-batch-process-impl-subflow" doc:id="6bc40a27-cad5-4fcc-8d9c-66983b7088ab" >
+		<logger level="INFO" doc:name="start" doc:id="436faefb-fef7-47a9-a4a3-e34e49fa3c4f" message='flow "sales-data-batch-process-impl-subflow" started' />
+		<ftp:list doc:name="List" doc:id="9a5ad57b-0c6c-4c08-8168-30417a1f97c7" config-ref="FTP_Config" directoryPath="/ftp/input/"/>
+		<foreach doc:name="For Each" doc:id="75320841-2052-4f37-a83b-b1c8f5215475" collection="#[payload]">
+			<ftp:read doc:name="Read" doc:id="d0cd95ef-faea-44d1-a983-a6f78c057eee" config-ref="FTP_Config" path="#[attributes.path]"/>
+			<ee:transform doc:name="transforming data to json" doc:id="11ec9d76-fd2b-4be0-b4eb-0536382ad139" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="fileName" ><![CDATA[attributes.name]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<batch:job jobName="sales-data-batch-process-impl-batchjob" doc:id="3c25fc23-ec09-4229-987c-423d7c1dbd9f" maxFailedRecords="-1">
+				<batch:process-records >
+					<batch:step name="Batch_Step_Success" doc:id="db806979-3f01-43a5-bdc7-81c782fa13be" acceptExpression="#[!(isEmpty(trim(payload.CustomerID)) or payload.CustomerID == null or (payload.Quantity &lt; 0))]">
+						<try doc:name="Try" doc:id="5303f560-b388-4c07-8b91-70e67c3acd3c" >
+							<logger level="INFO" doc:name="start" doc:id="f5d82723-9d7f-41e6-aa16-5e2f89219177" message="Inserting into database"/>
+							<set-variable value="#[payload]" doc:name="set payload" doc:id="bcc646c3-ac57-45b5-af42-158bff7e21fb" variableName="successdata"/>
+							<http:request method="POST" doc:name="request-to-sapi-db" doc:id="e1e0ede7-db82-4d4b-894e-6e0cbb822d9a" config-ref="HTTP_Request_configuration_db" path="/records-insert" responseTimeout="180000" />
+							<logger level="INFO" doc:name="status" doc:id="11dc0b8f-6afe-48ea-8202-9e01c75fb60f" message="Database insertion completed, writing success records into ftp"/>
+							<ee:transform doc:name="request payload" doc:id="0a905cf1-ca2b-4b45-89b0-528a73d790ac" >
+								<ee:message >
+								</ee:message>
+								<ee:variables >
+									<ee:set-variable variableName="responsevar" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "FileName" : "/ftp/success/" ++ (vars.fileName replace ".csv" with "") ++ "_successful_records_" ++ (now() as String { format: "yyyyMMdd" }) ++ ".csv",
+  "data" : vars.successdata
+}]]></ee:set-variable>
+								</ee:variables>
+							</ee:transform>
+							<flow-ref doc:name="common-subflow-success" doc:id="01610b64-8621-442c-b014-e7884469f48e" name="common-subflow"/>
+							<logger level="INFO" doc:name="end " doc:id="b38c3aaf-3c68-41be-ac22-1add644f250c" message="success records are written"/>
+							<error-handler >
+								<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="96971366-c453-4029-810a-601a04d0702f" >
+									<logger level="INFO" doc:name="start" doc:id="1e7588d7-1bed-4e58-91b4-03731671c549" message="writing system error records into ftp" />
+									<ee:transform doc:name="request payload" doc:id="5d7da61d-375e-46d9-84a0-033a04499eca" >
+										<ee:message />
+										<ee:variables >
+											<ee:set-variable variableName="responsevar" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "FileName" : "/ftp/error/" ++ (vars.fileName replace ".csv" with "") ++ "_system_errors_" ++ (now() as String { format: "yyyyMMdd" }) ++ ".csv",
+  "data" : payload
+}]]></ee:set-variable>
+										</ee:variables>
+									</ee:transform>
+									<flow-ref doc:name="common-subflow" doc:id="0aecff93-3cb8-4725-addb-90b6e0ada48b" name="common-subflow" />
+									<logger level="INFO" doc:name="end " doc:id="00ce5699-6330-47af-b064-828855b841d6" message="error records are written" />
+								</on-error-propagate>
+							</error-handler>
+						</try>
+					</batch:step>
+					<batch:step name="Batch_Step_Failure" doc:id="826089d6-c1e7-4820-9c87-8e76ca56cc26" acceptExpression="#[isEmpty(trim(payload.CustomerID)) or payload.CustomerID == null or (payload.Quantity &lt; 0)]">
+						<logger level="INFO" doc:name="start" doc:id="a231481a-5ef3-44ec-b443-1d2f8c9f9a30" message="writing validation error records into ftp"/>
+						<ee:transform doc:name="request payload" doc:id="3ef994d9-49a7-4afe-904a-fe9c8637bfa3">
+							<ee:message>
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="responsevar" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "FileName" : "/ftp/error/" ++ (vars.fileName replace ".csv" with "") ++ "_validation_errors_" ++ (now() as String { format: "yyyyMMdd" }) ++ ".csv",
+  "data" : payload
+}]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+						<flow-ref doc:name="common-subflow-failure" doc:id="e12aa766-6878-4c99-95bf-429054d3db31" name="common-subflow"/>
+						<logger level="INFO" doc:name="end" doc:id="10c8013d-35bd-4a07-a823-19673f255f8b" message="error records are written" />
+					</batch:step>
+				</batch:process-records>
+				<batch:on-complete>
+					<flow-ref doc:name="sales-data-mail-subflow" doc:id="08facba4-d0d2-47e4-94b7-45ddad8f54e1" name="sales-data-mail-subflow"/>
+					<ftp:move doc:name="Move" doc:id="a451a0e2-1f96-493f-96dc-10b0bdc26d83" config-ref="FTP_Config" sourcePath='#["/ftp/input/" ++ vars.fileName]' targetPath='#["/ftp/archive/"]' renameTo='#[vars.fileName replace ".csv" with "_" ++ now() as String {format: "yyyyMMdd"} ++ ".csv"]'/>
+					<logger level="INFO" doc:name="file status" doc:id="0d9ec47b-cb10-4147-9090-0ad445a426cd" message="file moved to archive "/>
+				</batch:on-complete>
+			</batch:job>
+		</foreach>
+		<logger level="INFO" doc:name="end" doc:id="d0f32aa3-04ca-4a27-818e-fd22627f115f" message='flow "sales-data-batch-process-impl-subflow" ended' />
+	</sub-flow>
+	<sub-flow name="sales-data-mail-subflow" doc:id="fdfd6512-e039-4737-9427-7b60d8c3bda7" >
+		<logger level="INFO" doc:name="start" doc:id="f7912da6-750d-42a0-a934-90778e28061f" message='flow "sales-data-mail" started' />
+		<set-variable doc:name="store payload" doc:id="53f98074-efc1-49e1-a490-7f382af81eb7" variableName="report" value="#[payload]"/>
+		<parse-template doc:name="Parse Template" doc:id="2d499a5f-091c-4534-b2a6-7fdc2155c330" location="template\sales-mail.html" target="email"/>
+		<ee:transform doc:name="request payload" doc:id="16f9f872-82c8-46e9-8389-b8e93f745cc5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  body: (vars.email as String)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="request-to-sapi-mail" doc:id="0eedbe45-b28a-4c4f-8109-055feddadd79" config-ref="HTTP_Request_configuration_mail" path="/send-summary" responseTimeout="180000"/>
+		<logger level="INFO" doc:name="end" doc:id="26880ffd-c3c4-4a57-aaba-83f3b06b332d" message='flow "sales-data-mail" ended'/>
+	</sub-flow>
+</mule>

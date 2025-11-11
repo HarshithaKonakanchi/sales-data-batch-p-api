@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd">
+	<sub-flow name="common-subflow" doc:id="73633980-489f-48f4-8035-3bd9a9da0d98" >
+		<os:contains doc:name="contains-filename" doc:id="27c3cea5-678a-4782-8ebd-893b5db820a4" key="#[vars.responsevar.FileName]" objectStore="orders_lastupdated_store" target="headerExists" />
+		<choice doc:name="check headers?" doc:id="dea90e84-c7fd-4792-99a3-5ca02d0a7b3a" >
+			<when expression="#[vars.headerExists == true]" >
+				<logger level="INFO" doc:name="writing to ftp" doc:id="99e5b180-7799-4045-bd74-51d3c224a814" message='#["writing system error records into ftp"]' />
+				<ftp:write doc:name="write-records" doc:id="941ea4d9-8120-4b9a-aa94-6d72f85f4b48" config-ref="FTP_Config" path='#[vars.responsevar.FileName]' mode="APPEND" >
+					<ftp:content ><![CDATA[#[%dw 2.0
+output text/csv header=false
+---
+vars.responsevar.data]]]></ftp:content>
+				</ftp:write>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="writing to ftp" doc:id="76a06726-e013-487e-83f9-d5b79d9176fa" message='#["writing system error records into ftp"]' />
+				<ftp:write doc:name="write-records" doc:id="c15bdd44-5f0f-4020-b690-bbbc03cccef2" config-ref="FTP_Config" path='#[vars.responsevar.FileName]' >
+					<ftp:content ><![CDATA[#[%dw 2.0
+output text/csv header=true
+---
+vars.responsevar.data]]]></ftp:content>
+				</ftp:write>
+				<os:store doc:name="store-filename" doc:id="ea673914-a11c-4c30-8aee-faa005678c24" key="#[vars.responsevar.FileName]" objectStore="orders_lastupdated_store" >
+					<os:value ><![CDATA[#[now() as String {format: "yyyyMMdd"}]]]></os:value>
+				</os:store>
+			</otherwise>
+		</choice>
+	</sub-flow>
+</mule>

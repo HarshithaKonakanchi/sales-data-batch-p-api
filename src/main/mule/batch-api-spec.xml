@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+   
+    <flow name="sales-data-batch-p-api-main">
+        <http:listener config-ref="sales-prc-api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="sales-data-batch-p-api-config" />
+    </flow>
+    <flow name="get:\process-file:sales-data-batch-p-api-config">
+		<flow-ref doc:name="sales-data-batch-process-impl" doc:id="6b23e1cb-9434-46bd-8954-58bd6c2b4bf7" name="sales-data-batch-process-impl-subflow"/>
+    </flow>
+	<flow name="sales-api-specFlow" doc:id="84efc95d-822b-4e41-a83c-657a23000cfd" >
+		<scheduler doc:name="Scheduler" doc:id="9d1dea5b-9a3c-4264-8ebf-572e15967002" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="30" timeUnit="MINUTES" />
+			</scheduling-strategy>
+		</scheduler>
+		<flow-ref doc:name="sales-data-batch-process-impl" doc:id="f50e64ff-7c02-4a78-9b14-0ffe1e74e68f" name="sales-data-batch-process-impl-subflow" />
+	</flow>
+</mule>
